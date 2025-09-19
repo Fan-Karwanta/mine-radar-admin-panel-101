@@ -5,8 +5,7 @@ import ProtectedRoute from "./components/common/ProtectedRoute";
 
 import DashboardPage from "./pages/DashboardPage";
 import UsersPage from "./pages/UsersPage";
-import DestinationsPage from "./pages/DestinationsPage";
-import RatingsPage from "./pages/RatingsPage";
+import ReportsPage from "./pages/ReportsPage";
 import LoginPage from "./pages/LoginPage";
 
 // Layout component for authenticated pages
@@ -36,9 +35,8 @@ function App() {
 			<Route element={<ProtectedRoute />}>
 				<Route element={<DashboardLayout />}>
 					<Route path="/" element={<DashboardPage />} />
+					<Route path="/reports" element={<ReportsPage />} />
 					<Route path="/users" element={<UsersPage />} />
-					<Route path="/destinations" element={<DestinationsPage />} />
-					<Route path="/ratings" element={<RatingsPage />} />
 				</Route>
 			</Route>
 			

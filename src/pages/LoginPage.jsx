@@ -16,9 +16,8 @@ const LoginPage = () => {
 		setError("");
 		
 		try {
-			const response = await fetch(`${API_BASE_URL}/admin/auth/login`, {
+			const response = await fetch(`${API_BASE_URL}/api/admin/login`, {
 				method: 'POST',
-				credentials: 'include',
 				headers: {
 					'Content-Type': 'application/json',
 				},
@@ -27,7 +26,10 @@ const LoginPage = () => {
 
 			const data = await response.json();
 
-			if (response.ok) {
+			if (response.ok && data.success) {
+				// Store admin token in localStorage
+				localStorage.setItem('adminToken', data.token);
+				localStorage.setItem('adminUser', JSON.stringify(data.admin));
 				window.location.href = '/';
 			} else {
 				setError(data.message || 'Login failed');
@@ -51,7 +53,7 @@ const LoginPage = () => {
 						className='mx-auto flex justify-center mb-8'
 					>
 						<div className="text-center">
-							<h1 className="text-4xl font-bold text-white mb-2">MOTOUR</h1>
+							<h1 className="text-4xl font-bold text-white mb-2">MINE RADAR</h1>
 							<p className="text-gray-400">Admin Panel</p>
 						</div>
 					</motion.div>
@@ -159,7 +161,7 @@ const LoginPage = () => {
 					</div>
 
 					<div className="text-center text-sm text-gray-400">
-						<p>2025 © MoTour Admin Panel. All rights reserved.</p>
+						<p>2025 © Mine Radar Admin Panel. All rights reserved.</p>
 					</div>
 				</motion.form>
 			</div>

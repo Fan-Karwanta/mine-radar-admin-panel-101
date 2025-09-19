@@ -7,14 +7,13 @@ const ProtectedRoute = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const checkAuth = () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/admin/auth/verify`, {
-          method: 'GET',
-          credentials: 'include',
-        });
-
-        if (response.ok) {
+        const token = localStorage.getItem('adminToken');
+        const adminUser = localStorage.getItem('adminUser');
+        
+        if (token && adminUser) {
+          // Simple token validation - in production you might want to verify with server
           setIsAuthenticated(true);
         } else {
           setIsAuthenticated(false);

@@ -1,8 +1,7 @@
-// Admin webapp configuration
-// Using the same server as the client app
+// Mining App Admin Panel Configuration
 
 // For local development
-// export const API_BASE_URL = 'http://localhost:3000';
+export const API_BASE_URL = 'http://localhost:3000';
 
 // For production (uncomment when deploying)
- export const API_BASE_URL = 'https://motour-server-101.onrender.com';
+// export const API_BASE_URL = 'https://your-production-server.com';

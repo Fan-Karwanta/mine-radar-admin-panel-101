@@ -1,4 +1,4 @@
-import { BarChart2, Menu, MapPin, Users, LogOut, Star } from "lucide-react";
+import { BarChart2, Menu, FileText, Users, LogOut } from "lucide-react";
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Link, useLocation } from "react-router-dom";
@@ -12,22 +12,16 @@ const SIDEBAR_ITEMS = [
 		href: "/",
 	},
 	{ 
-		name: "Users", 
+		name: "Reports Management", 
+		icon: FileText, 
+		color: "#ffffff", 
+		href: "/reports" 
+	},
+	{ 
+		name: "User Management", 
 		icon: Users, 
 		color: "#ffffff", 
 		href: "/users" 
-	},
-	{ 
-		name: "Destinations", 
-		icon: MapPin, 
-		color: "#ffffff", 
-		href: "/destinations" 
-	},
-	{ 
-		name: "Ratings", 
-		icon: Star, 
-		color: "#ffffff", 
-		href: "/ratings" 
 	},
 ];
 
@@ -36,16 +30,12 @@ const Sidebar = () => {
 	const [showLogoutModal, setShowLogoutModal] = useState(false);
 	const location = useLocation();
 
-	const handleLogout = async () => {
+	const handleLogout = () => {
 		try {
-			const response = await fetch(`${API_BASE_URL}/api/admin/auth/logout`, {
-				method: 'POST',
-				credentials: 'include',
-			});
-
-			if (response.ok) {
-				window.location.href = '/login';
-			}
+			// Clear admin token and user data
+			localStorage.removeItem('adminToken');
+			localStorage.removeItem('adminUser');
+			window.location.href = '/login';
 		} catch (error) {
 			console.error('Logout error:', error);
 		}
@@ -79,7 +69,7 @@ const Sidebar = () => {
 								className='flex items-center justify-center mb-8'
 							>
 								<div className="text-center">
-									<h1 className="text-2xl font-bold text-white">MOTOUR</h1>
+									<h1 className="text-2xl font-bold text-white">MINE RADAR</h1>
 									<p className="text-gray-400 text-sm">Admin Panel</p>
 								</div>
 							</motion.div>

@@ -1,40 +1,30 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Users, MapPin, Star, Heart, TrendingUp, TrendingDown } from 'lucide-react';
+import { Users, FileText, Database, AlertTriangle, TrendingUp, TrendingDown, MapPin } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
-import { API_BASE_URL } from '../config';
+import adminService from '../services/adminService';
 
 const DashboardPage = () => {
-  const [metrics, setMetrics] = useState(null);
+  const [analytics, setAnalytics] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [timeRange, setTimeRange] = useState('30d');
 
   useEffect(() => {
-    fetchMetrics();
-  }, [timeRange]);
+    fetchAnalytics();
+  }, []);
 
-  const fetchMetrics = async () => {
+  const fetchAnalytics = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_BASE_URL}/admin/metrics/overview?range=${timeRange}`, {
-        credentials: 'include',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setMetrics(data.metrics);
-      }
+      const data = await adminService.getDashboardAnalytics();
+      setAnalytics(data.data);
     } catch (error) {
-      console.error('Error fetching metrics:', error);
+      console.error('Error fetching analytics:', error);
     } finally {
       setLoading(false);
     }
   };
 
-  const StatCard = ({ title, value, change, icon: Icon, trend }) => (
+  const StatCard = ({ title, value, icon: Icon, color = "text-white" }) => (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -43,216 +33,275 @@ const DashboardPage = () => {
       <div className="flex items-center justify-between">
         <div>
           <p className="text-gray-400 text-sm font-medium">{title}</p>
-          <p className="text-2xl font-bold text-white mt-1">{value}</p>
-          {change !== undefined && (
-            <div className="flex items-center mt-2">
-              {trend === 'up' ? (
-                <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-              ) : (
-                <TrendingDown className="h-4 w-4 text-red-500 mr-1" />
-              )}
-              <span className={`text-sm ${trend === 'up' ? 'text-green-500' : 'text-red-500'}`}>
-                {change}
-              </span>
-            </div>
-          )}
+          <p className={`text-2xl font-bold mt-1 ${color}`}>{value}</p>
         </div>
-        <div className="bg-gray-800 p-3 rounded-lg">
-          <Icon className="h-6 w-6 text-white" />
+        <div className="p-3 bg-gray-800 rounded-lg">
+          <Icon className="h-6 w-6 text-gray-400" />
         </div>
       </div>
     </motion.div>
   );
 
-  const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#F97316', '#06B6D4', '#84CC16'];
+  const COLORS = ['#8B5CF6', '#06B6D4', '#10B981', '#F59E0B', '#EF4444'];
+
+  const formatChartData = (data, labelKey, valueKey) => {
+    if (!data || !Array.isArray(data)) return [];
+    return data.map(item => ({
+      name: item[labelKey] || 'Unknown',
+      value: item[valueKey] || 0
+    }));
+  };
+
+  const formatMonthlyData = (data) => {
+    if (!data || !Array.isArray(data)) return [];
+    return data.map(item => ({
+      month: `${item._id?.month || 0}/${item._id?.year || 2024}`,
+      reports: item.count || 0
+    }));
+  };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-white"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-white"></div>
       </div>
     );
   }
 
+  if (!analytics) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center">
+          <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
+          <p className="text-white text-lg">Failed to load dashboard data</p>
+          <button 
+            onClick={fetchAnalytics}
+            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const reportStatusData = formatChartData(analytics.reportsByStatus, '_id', 'count');
+  const reportTypeData = formatChartData(analytics.reportsByType, '_id', 'count');
+  const userRoleData = formatChartData(analytics.usersByRole, '_id', 'count');
+  const monthlyReportsData = formatMonthlyData(analytics.reportsByMonth);
+
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Dashboard</h1>
-          <p className="text-gray-400 mt-1">Welcome to Motour Admin Panel</p>
-        </div>
-        <div className="flex space-x-2">
-          {['7d', '30d', '90d', 'all'].map((range) => (
-            <button
-              key={range}
-              onClick={() => setTimeRange(range)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                timeRange === range
-                  ? 'bg-white text-black'
-                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-              }`}
-            >
-              {range === 'all' ? 'All Time' : range.toUpperCase()}
-            </button>
-          ))}
-        </div>
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-white mb-2">Mine Radar Dashboard</h1>
+        <p className="text-gray-400">Monitor mining violation reports and user activity</p>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
         <StatCard
           title="Total Users"
-          value={metrics?.users?.total || 0}
-          change={`+${metrics?.users?.new || 0} new`}
+          value={analytics.totals?.users || 0}
           icon={Users}
-          trend="up"
+          color="text-blue-400"
         />
         <StatCard
-          title="Destinations"
-          value={metrics?.destinations?.total || 0}
-          change={`+${metrics?.destinations?.new || 0} new`}
+          title="Total Reports"
+          value={analytics.totals?.reports || 0}
+          icon={FileText}
+          color="text-green-400"
+        />
+        <StatCard
+          title="National Directory"
+          value={analytics.totals?.nationalDirectory || 0}
+          icon={Database}
+          color="text-purple-400"
+        />
+        <StatCard
+          title="Local Directory"
+          value={analytics.totals?.localDirectory || 0}
           icon={MapPin}
-          trend="up"
+          color="text-yellow-400"
         />
         <StatCard
-          title="Total Ratings"
-          value={metrics?.ratings?.total || 0}
-          change={`${metrics?.ratings?.overallAverage || 0}/5 avg`}
-          icon={Star}
-          trend="up"
-        />
-        <StatCard
-          title="Saved Destinations"
-          value={metrics?.savedDestinations?.total || 0}
-          change={`+${metrics?.savedDestinations?.new || 0} new`}
-          icon={Heart}
-          trend="up"
+          title="Hotspots"
+          value={analytics.totals?.hotspots || 0}
+          icon={AlertTriangle}
+          color="text-red-400"
         />
       </div>
 
-      {/* Charts Row */}
+      {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* User Registration Trend */}
+        {/* Reports by Status */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="bg-gray-900 border border-gray-800 rounded-lg p-6"
         >
-          <h3 className="text-lg font-semibold text-white mb-4">User Registration Trend</h3>
+          <h3 className="text-lg font-semibold text-white mb-4">Reports by Status</h3>
           <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={metrics?.users?.registrationTrend || []}>
+            <PieChart>
+              <Pie
+                data={reportStatusData}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="value"
+              >
+                {reportStatusData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip />
+            </PieChart>
+          </ResponsiveContainer>
+        </motion.div>
+
+        {/* Reports by Type */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gray-900 border border-gray-800 rounded-lg p-6"
+        >
+          <h3 className="text-lg font-semibold text-white mb-4">Reports by Type</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart data={reportTypeData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-              <XAxis dataKey="_id" stroke="#9CA3AF" />
+              <XAxis 
+                dataKey="name" 
+                stroke="#9CA3AF"
+                fontSize={12}
+                angle={-45}
+                textAnchor="end"
+                height={80}
+              />
               <YAxis stroke="#9CA3AF" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#1F2937',
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: '#1F2937', 
                   border: '1px solid #374151',
-                  borderRadius: '8px',
-                  color: '#F9FAFB'
+                  borderRadius: '8px'
                 }}
               />
-              <Line type="monotone" dataKey="count" stroke="#3B82F6" strokeWidth={2} />
+              <Bar dataKey="value" fill="#8B5CF6" />
+            </BarChart>
+          </ResponsiveContainer>
+        </motion.div>
+      </div>
+
+      {/* Monthly Reports Trend & User Roles */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Monthly Reports */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="lg:col-span-2 bg-gray-900 border border-gray-800 rounded-lg p-6"
+        >
+          <h3 className="text-lg font-semibold text-white mb-4">Monthly Reports Trend</h3>
+          <ResponsiveContainer width="100%" height={300}>
+            <LineChart data={monthlyReportsData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+              <XAxis dataKey="month" stroke="#9CA3AF" />
+              <YAxis stroke="#9CA3AF" />
+              <Tooltip 
+                contentStyle={{ 
+                  backgroundColor: '#1F2937', 
+                  border: '1px solid #374151',
+                  borderRadius: '8px'
+                }}
+              />
+              <Line 
+                type="monotone" 
+                dataKey="reports" 
+                stroke="#06B6D4" 
+                strokeWidth={2}
+                dot={{ fill: '#06B6D4', strokeWidth: 2, r: 4 }}
+              />
             </LineChart>
           </ResponsiveContainer>
         </motion.div>
 
-        {/* Destinations by Category */}
+        {/* Users by Role */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="bg-gray-900 border border-gray-800 rounded-lg p-6"
         >
-          <h3 className="text-lg font-semibold text-white mb-4">Destinations by Category</h3>
+          <h3 className="text-lg font-semibold text-white mb-4">Users by Role</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
-                data={metrics?.destinations?.byCategory || []}
+                data={userRoleData}
                 cx="50%"
                 cy="50%"
                 labelLine={false}
-                label={({ _id, percent }) => `${_id} ${(percent * 100).toFixed(0)}%`}
+                label={({ name, value }) => `${name}: ${value}`}
                 outerRadius={80}
                 fill="#8884d8"
-                dataKey="count"
+                dataKey="value"
               >
-                {(metrics?.destinations?.byCategory || []).map((entry, index) => (
+                {userRoleData.map((entry, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#1F2937',
-                  border: '1px solid #374151',
-                  borderRadius: '8px',
-                  color: '#F9FAFB'
-                }}
-              />
+              <Tooltip />
             </PieChart>
           </ResponsiveContainer>
         </motion.div>
       </div>
 
-      {/* Tables Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Top Rated Destinations */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-gray-900 border border-gray-800 rounded-lg p-6"
-        >
-          <h3 className="text-lg font-semibold text-white mb-4">Top Rated Destinations</h3>
-          <div className="space-y-3">
-            {(metrics?.destinations?.topRated || []).map((destination, index) => (
-              <div key={destination._id} className="flex items-center justify-between p-3 bg-gray-800 rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-gray-700 rounded-lg overflow-hidden">
-                    {destination.photos?.main && (
-                      <img
-                        src={destination.photos.main}
-                        alt={destination.name}
-                        className="w-full h-full object-cover"
-                      />
-                    )}
-                  </div>
-                  <div>
-                    <p className="font-medium text-white">{destination.name}</p>
-                    <p className="text-sm text-gray-400">{destination.category}</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                  <span className="text-white font-medium">{destination.averageRating}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Most Rated Destinations */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-gray-900 border border-gray-800 rounded-lg p-6"
-        >
-          <h3 className="text-lg font-semibold text-white mb-4">Most Rated Destinations</h3>
-          <div className="space-y-3">
-            {(metrics?.ratings?.perDestination || []).map((item, index) => (
-              <div key={item._id} className="flex items-center justify-between p-3 bg-gray-800 rounded-lg">
-                <div>
-                  <p className="font-medium text-white">{item.destinationName}</p>
-                  <p className="text-sm text-gray-400">{item.count} ratings</p>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <Star className="h-4 w-4 text-yellow-500 fill-current" />
-                  <span className="text-white font-medium">{item.averageRating}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-      </div>
+      {/* Recent Reports */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-gray-900 border border-gray-800 rounded-lg p-6"
+      >
+        <h3 className="text-lg font-semibold text-white mb-4">Recent Reports</h3>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-gray-700">
+                <th className="text-left py-3 px-4 text-gray-400">Report ID</th>
+                <th className="text-left py-3 px-4 text-gray-400">Type</th>
+                <th className="text-left py-3 px-4 text-gray-400">Status</th>
+                <th className="text-left py-3 px-4 text-gray-400">Submitted By</th>
+                <th className="text-left py-3 px-4 text-gray-400">Location</th>
+                <th className="text-left py-3 px-4 text-gray-400">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {analytics.recentReports?.map((report, index) => (
+                <tr key={report._id || index} className="border-b border-gray-800 hover:bg-gray-800">
+                  <td className="py-3 px-4 text-white font-mono">{report.reportId}</td>
+                  <td className="py-3 px-4 text-gray-300">
+                    {report.reportType?.replace('illegal_', '').replace('_', ' ')}
+                  </td>
+                  <td className="py-3 px-4">
+                    <span className={`px-2 py-1 rounded-full text-xs ${
+                      report.status === 'pending' ? 'bg-yellow-900 text-yellow-300' :
+                      report.status === 'under_investigation' ? 'bg-blue-900 text-blue-300' :
+                      report.status === 'resolved' ? 'bg-green-900 text-green-300' :
+                      'bg-red-900 text-red-300'
+                    }`}>
+                      {report.status?.replace('_', ' ')}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4 text-gray-300">{report.submittedBy}</td>
+                  <td className="py-3 px-4 text-gray-300">{report.location}</td>
+                  <td className="py-3 px-4 text-gray-300">
+                    {new Date(report.submittedAt).toLocaleDateString()}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </motion.div>
     </div>
   );
 };
