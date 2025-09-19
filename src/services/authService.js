@@ -12,7 +12,7 @@ export const authService = {
       console.log('Attempting login with:', { username });
       
       // Use the admin login endpoint with username
-      const response = await axios.post(`${API_BASE_URL}/admin/auth/login`, {
+      const response = await axios.post(`${API_BASE_URL}/api/admin/auth/login`, {
         username,
         password
       }, {
@@ -34,7 +34,7 @@ export const authService = {
   // Logout admin
   logout: async () => {
     try {
-      await axios.post(`${API_BASE_URL}/admin/auth/logout`, {}, {
+      await axios.post(`${API_BASE_URL}/api/admin/auth/logout`, {}, {
         withCredentials: true
       });
     } catch (error) {
@@ -47,7 +47,7 @@ export const authService = {
   // Check if user is logged in
   isLoggedIn: async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/admin/auth/verify`, {
+      const response = await axios.get(`${API_BASE_URL}/api/admin/auth/verify`, {
         withCredentials: true
       });
       return response.data.success;
@@ -65,7 +65,7 @@ export const authService = {
   // Verify authentication
   verifyAuth: async () => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/admin/auth/verify`, {
+      const response = await axios.get(`${API_BASE_URL}/api/admin/auth/verify`, {
         withCredentials: true
       });
       
