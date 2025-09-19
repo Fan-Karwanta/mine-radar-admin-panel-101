@@ -16,20 +16,20 @@ const LoginPage = () => {
 		setError("");
 		
 		try {
-			const response = await fetch(`${API_BASE_URL}/api/admin/login`, {
+			const response = await fetch(`${API_BASE_URL}/api/admin/auth/login`, {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 				},
+				credentials: 'include', // Include cookies for cross-origin requests
 				body: JSON.stringify({ username, password }),
 			});
 
 			const data = await response.json();
 
 			if (response.ok && data.success) {
-				// Store admin token in localStorage
-				localStorage.setItem('adminToken', data.token);
-				localStorage.setItem('adminUser', JSON.stringify(data.admin));
+				// Store admin user info in localStorage (token is in HTTP-only cookie)
+				localStorage.setItem('admin_user', JSON.stringify(data.admin));
 				window.location.href = '/';
 			} else {
 				setError(data.message || 'Login failed');

@@ -5,27 +5,34 @@ class AdminService {
     this.baseURL = `${API_BASE_URL}/api/admin`;
   }
 
-  // Get auth token from localStorage
-  getAuthToken() {
-    return localStorage.getItem('adminToken');
+  // Create headers for cookie-based auth
+  getAuthHeaders() {
+    return {
+      'Content-Type': 'application/json'
+    };
   }
 
-  // Create headers with auth token
-  getAuthHeaders() {
-    const token = this.getAuthToken();
-    return {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
+  // Get fetch options with credentials for cookie-based auth
+  getFetchOptions(method = 'GET', body = null) {
+    const options = {
+      method,
+      headers: this.getAuthHeaders(),
+      credentials: 'include' // Include cookies for cross-origin requests
     };
+    
+    if (body) {
+      options.body = JSON.stringify(body);
+    }
+    
+    return options;
   }
 
   // Dashboard Analytics
   async getDashboardAnalytics() {
     try {
-      const response = await fetch(`${this.baseURL}/dashboard/analytics`, {
-        method: 'GET',
-        headers: this.getAuthHeaders()
-      });
+      const response = await fetch(`${this.baseURL}/dashboard/analytics`, 
+        this.getFetchOptions('GET')
+      );
 
       if (!response.ok) {
         throw new Error('Failed to fetch dashboard analytics');
@@ -43,10 +50,9 @@ class AdminService {
   async getReports(params = {}) {
     try {
       const queryParams = new URLSearchParams(params);
-      const response = await fetch(`${this.baseURL}/reports?${queryParams}`, {
-        method: 'GET',
-        headers: this.getAuthHeaders()
-      });
+      const response = await fetch(`${this.baseURL}/reports?${queryParams}`, 
+        this.getFetchOptions('GET')
+      );
 
       if (!response.ok) {
         throw new Error('Failed to fetch reports');
@@ -62,10 +68,9 @@ class AdminService {
 
   async getReportById(id) {
     try {
-      const response = await fetch(`${this.baseURL}/reports/${id}`, {
-        method: 'GET',
-        headers: this.getAuthHeaders()
-      });
+      const response = await fetch(`${this.baseURL}/reports/${id}`, 
+        this.getFetchOptions('GET')
+      );
 
       if (!response.ok) {
         throw new Error('Failed to fetch report');
@@ -81,11 +86,9 @@ class AdminService {
 
   async updateReportStatus(id, status) {
     try {
-      const response = await fetch(`${this.baseURL}/reports/${id}/status`, {
-        method: 'PUT',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify({ status })
-      });
+      const response = await fetch(`${this.baseURL}/reports/${id}/status`, 
+        this.getFetchOptions('PUT', { status })
+      );
 
       if (!response.ok) {
         throw new Error('Failed to update report status');
@@ -101,10 +104,9 @@ class AdminService {
 
   async deleteReport(id) {
     try {
-      const response = await fetch(`${this.baseURL}/reports/${id}`, {
-        method: 'DELETE',
-        headers: this.getAuthHeaders()
-      });
+      const response = await fetch(`${this.baseURL}/reports/${id}`, 
+        this.getFetchOptions('DELETE')
+      );
 
       if (!response.ok) {
         throw new Error('Failed to delete report');
@@ -122,10 +124,9 @@ class AdminService {
   async getUsers(params = {}) {
     try {
       const queryParams = new URLSearchParams(params);
-      const response = await fetch(`${this.baseURL}/users?${queryParams}`, {
-        method: 'GET',
-        headers: this.getAuthHeaders()
-      });
+      const response = await fetch(`${this.baseURL}/users?${queryParams}`, 
+        this.getFetchOptions('GET')
+      );
 
       if (!response.ok) {
         throw new Error('Failed to fetch users');
@@ -141,11 +142,9 @@ class AdminService {
 
   async updateUserRole(id, role) {
     try {
-      const response = await fetch(`${this.baseURL}/users/${id}/role`, {
-        method: 'PUT',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify({ role })
-      });
+      const response = await fetch(`${this.baseURL}/users/${id}/role`, 
+        this.getFetchOptions('PUT', { role })
+      );
 
       if (!response.ok) {
         throw new Error('Failed to update user role');
@@ -161,11 +160,9 @@ class AdminService {
 
   async updateUserStatus(id, status) {
     try {
-      const response = await fetch(`${this.baseURL}/users/${id}/status`, {
-        method: 'PUT',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify({ status })
-      });
+      const response = await fetch(`${this.baseURL}/users/${id}/status`, 
+        this.getFetchOptions('PUT', { status })
+      );
 
       if (!response.ok) {
         throw new Error('Failed to update user status');
@@ -181,10 +178,9 @@ class AdminService {
 
   async deleteUser(id) {
     try {
-      const response = await fetch(`${this.baseURL}/users/${id}`, {
-        method: 'DELETE',
-        headers: this.getAuthHeaders()
-      });
+      const response = await fetch(`${this.baseURL}/users/${id}`, 
+        this.getFetchOptions('DELETE')
+      );
 
       if (!response.ok) {
         throw new Error('Failed to delete user');
