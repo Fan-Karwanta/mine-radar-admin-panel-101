@@ -7,19 +7,49 @@ const ProtectedRoute = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = () => {
+    const checkAuth = async () => {
       try {
-        const token = localStorage.getItem('adminToken');
-        const adminUser = localStorage.getItem('adminUser');
+        // Use correct localStorage keys that match LoginPage.jsx
+        const token = localStorage.getItem('admin_token');
+        const adminUser = localStorage.getItem('admin_user');
         
-        if (token && adminUser) {
-          // Simple token validation - in production you might want to verify with server
-          setIsAuthenticated(true);
+        if (!token || !adminUser) {
+          setIsAuthenticated(false);
+          setIsLoading(false);
+          return;
+        }
+
+        // Verify token with server
+        const response = await fetch(`${API_BASE_URL}/api/admin/auth/verify`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include', // Include cookies
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            setIsAuthenticated(true);
+          } else {
+            // Token is invalid, clear localStorage
+            localStorage.removeItem('admin_token');
+            localStorage.removeItem('admin_user');
+            setIsAuthenticated(false);
+          }
         } else {
+          // Server error or token invalid
+          localStorage.removeItem('admin_token');
+          localStorage.removeItem('admin_user');
           setIsAuthenticated(false);
         }
       } catch (error) {
         console.error('Auth check failed:', error);
+        // Clear potentially invalid tokens
+        localStorage.removeItem('admin_token');
+        localStorage.removeItem('admin_user');
         setIsAuthenticated(false);
       } finally {
         setIsLoading(false);
