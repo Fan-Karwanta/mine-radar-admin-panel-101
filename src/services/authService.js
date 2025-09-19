@@ -15,13 +15,12 @@ export const authService = {
       const response = await axios.post(`${API_BASE_URL}/api/admin/auth/login`, {
         username,
         password
-      }, {
-        withCredentials: true
       });
       
       console.log('Login response:', response.data);
       
-      // Store user info in localStorage (token is in HTTP-only cookie)
+      // Store token and user info in localStorage
+      localStorage.setItem('admin_token', response.data.token);
       localStorage.setItem('admin_user', JSON.stringify(response.data.admin));
       
       return response.data;
@@ -34,12 +33,18 @@ export const authService = {
   // Logout admin
   logout: async () => {
     try {
-      await axios.post(`${API_BASE_URL}/api/admin/auth/logout`, {}, {
-        withCredentials: true
-      });
+      const token = localStorage.getItem('admin_token');
+      if (token) {
+        await axios.post(`${API_BASE_URL}/api/admin/auth/logout`, {}, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+      }
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
+      localStorage.removeItem('admin_token');
       localStorage.removeItem('admin_user');
     }
   },
@@ -47,8 +52,13 @@ export const authService = {
   // Check if user is logged in
   isLoggedIn: async () => {
     try {
+      const token = localStorage.getItem('admin_token');
+      if (!token) return false;
+      
       const response = await axios.get(`${API_BASE_URL}/api/admin/auth/verify`, {
-        withCredentials: true
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
       return response.data.success;
     } catch (error) {
@@ -65,8 +75,16 @@ export const authService = {
   // Verify authentication
   verifyAuth: async () => {
     try {
+      const token = localStorage.getItem('admin_token');
+      if (!token) {
+        localStorage.removeItem('admin_user');
+        return null;
+      }
+      
       const response = await axios.get(`${API_BASE_URL}/api/admin/auth/verify`, {
-        withCredentials: true
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
       
       if (response.data.success) {
@@ -77,6 +95,7 @@ export const authService = {
       return null;
     } catch (error) {
       console.error('Auth verification error:', error.response?.data || error.message);
+      localStorage.removeItem('admin_token');
       localStorage.removeItem('admin_user');
       return null;
     }

@@ -5,19 +5,30 @@ class AdminService {
     this.baseURL = `${API_BASE_URL}/api/admin`;
   }
 
-  // Create headers for cookie-based auth
-  getAuthHeaders() {
-    return {
-      'Content-Type': 'application/json'
-    };
+  // Get auth token from localStorage
+  getAuthToken() {
+    return localStorage.getItem('admin_token');
   }
 
-  // Get fetch options with credentials for cookie-based auth
+  // Create headers with Bearer token
+  getAuthHeaders() {
+    const token = this.getAuthToken();
+    const headers = {
+      'Content-Type': 'application/json'
+    };
+    
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    
+    return headers;
+  }
+
+  // Get fetch options with Bearer token auth
   getFetchOptions(method = 'GET', body = null) {
     const options = {
       method,
-      headers: this.getAuthHeaders(),
-      credentials: 'include' // Include cookies for cross-origin requests
+      headers: this.getAuthHeaders()
     };
     
     if (body) {

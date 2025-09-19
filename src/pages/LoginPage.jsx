@@ -28,7 +28,8 @@ const LoginPage = () => {
 			const data = await response.json();
 
 			if (response.ok && data.success) {
-				// Store admin user info in localStorage (token is in HTTP-only cookie)
+				// Store admin token and user info in localStorage
+				localStorage.setItem('admin_token', data.token);
 				localStorage.setItem('admin_user', JSON.stringify(data.admin));
 				window.location.href = '/';
 			} else {
