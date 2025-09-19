@@ -1,7 +1,21 @@
 // Mining App Admin Panel Configuration
 
-// For local development
-export const API_BASE_URL = 'http://localhost:3000';
+// Get API base URL from environment variables
+// In development: http://localhost:3000
+// In production: your deployed backend URL
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
-// For production (uncomment when deploying)
-// export const API_BASE_URL = 'https://your-production-server.com';
+// App configuration
+export const APP_CONFIG = {
+  name: import.meta.env.VITE_APP_NAME || 'MineRadar Admin Panel',
+  version: import.meta.env.VITE_APP_VERSION || '1.0.0',
+  environment: import.meta.env.VITE_NODE_ENV || 'development'
+};
+
+// Debug logging in development
+if (import.meta.env.DEV) {
+  console.log('Admin Panel Config:', {
+    API_BASE_URL,
+    environment: APP_CONFIG.environment
+  });
+}
