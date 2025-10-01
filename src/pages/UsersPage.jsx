@@ -226,11 +226,11 @@ const UsersPage = () => {
               <table className="w-full">
                 <thead className="bg-gray-800">
                   <tr>
-                    <th className="text-left py-4 px-6 text-gray-300 font-medium">Username</th>
+                    <th className="text-left py-4 px-6 text-gray-300 font-medium">Complete Name</th>
                     <th className="text-left py-4 px-6 text-gray-300 font-medium">Email</th>
+                    <th className="text-left py-4 px-6 text-gray-300 font-medium">Agency</th>
                     <th className="text-left py-4 px-6 text-gray-300 font-medium">Role</th>
                     <th className="text-left py-4 px-6 text-gray-300 font-medium">Status</th>
-                    <th className="text-left py-4 px-6 text-gray-300 font-medium">Joined</th>
                     <th className="text-left py-4 px-6 text-gray-300 font-medium">Actions</th>
                   </tr>
                 </thead>
@@ -243,13 +243,11 @@ const UsersPage = () => {
                       transition={{ delay: index * 0.1 }}
                       className="border-b border-gray-800 hover:bg-gray-800"
                     >
-                      <td className="py-4 px-6 text-white">{user.username}</td>
+                      <td className="py-4 px-6 text-white">{user.completeName || 'N/A'}</td>
                       <td className="py-4 px-6 text-gray-300">{user.email}</td>
+                      <td className="py-4 px-6 text-gray-300">{user.agency || 'N/A'}</td>
                       <td className="py-4 px-6">{getRoleBadge(user.role)}</td>
                       <td className="py-4 px-6">{getStatusBadge(user.status)}</td>
-                      <td className="py-4 px-6 text-gray-300">
-                        {new Date(user.createdAt).toLocaleDateString()}
-                      </td>
                       <td className="py-4 px-6">
                         <div className="flex items-center space-x-2">
                           <button
@@ -350,36 +348,19 @@ const UsersPage = () => {
             <div className="p-6 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <h3 className="text-lg font-semibold text-white mb-4">Basic Information</h3>
+                  <h3 className="text-lg font-semibold text-white mb-4">Personal Information</h3>
                   <div className="space-y-3">
                     <div>
-                      <label className="text-gray-400 text-sm">Username</label>
-                      <p className="text-white">{selectedUser.username}</p>
+                      <label className="text-gray-400 text-sm">Complete Name</label>
+                      <p className="text-white">{selectedUser.completeName || 'N/A'}</p>
                     </div>
                     <div>
                       <label className="text-gray-400 text-sm">Email</label>
                       <p className="text-white">{selectedUser.email}</p>
                     </div>
                     <div>
-                      <label className="text-gray-400 text-sm">Role</label>
-                      <div className="mt-1">{getRoleBadge(selectedUser.role)}</div>
-                    </div>
-                    <div>
-                      <label className="text-gray-400 text-sm">Status</label>
-                      <div className="mt-1">{getStatusBadge(selectedUser.status)}</div>
-                    </div>
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-white mb-4">Account Information</h3>
-                  <div className="space-y-3">
-                    <div>
-                      <label className="text-gray-400 text-sm">Joined Date</label>
-                      <p className="text-white">{new Date(selectedUser.createdAt).toLocaleDateString()}</p>
-                    </div>
-                    <div>
-                      <label className="text-gray-400 text-sm">Last Updated</label>
-                      <p className="text-white">{new Date(selectedUser.updatedAt).toLocaleDateString()}</p>
+                      <label className="text-gray-400 text-sm">Contact Number</label>
+                      <p className="text-white">{selectedUser.contactNumber || 'N/A'}</p>
                     </div>
                     {selectedUser.profileImage && (
                       <div>
@@ -391,6 +372,40 @@ const UsersPage = () => {
                         />
                       </div>
                     )}
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-4">Professional Information</h3>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="text-gray-400 text-sm">Agency/Company</label>
+                      <p className="text-white">{selectedUser.agency || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <label className="text-gray-400 text-sm">Position/Designation</label>
+                      <p className="text-white">{selectedUser.position || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <label className="text-gray-400 text-sm">Role</label>
+                      <div className="mt-1">{getRoleBadge(selectedUser.role)}</div>
+                    </div>
+                    <div>
+                      <label className="text-gray-400 text-sm">Status</label>
+                      <div className="mt-1">{getStatusBadge(selectedUser.status)}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="border-t border-gray-800 pt-6">
+                <h3 className="text-lg font-semibold text-white mb-4">Account Information</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="text-gray-400 text-sm">Joined Date</label>
+                    <p className="text-white">{new Date(selectedUser.createdAt).toLocaleDateString()}</p>
+                  </div>
+                  <div>
+                    <label className="text-gray-400 text-sm">Last Updated</label>
+                    <p className="text-white">{new Date(selectedUser.updatedAt).toLocaleDateString()}</p>
                   </div>
                 </div>
               </div>
