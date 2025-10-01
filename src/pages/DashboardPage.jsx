@@ -291,7 +291,11 @@ const DashboardPage = () => {
                       {report.status?.replace('_', ' ')}
                     </span>
                   </td>
-                  <td className="py-3 px-4 text-gray-300">{report.submittedBy}</td>
+                  <td className="py-3 px-4 text-gray-300">
+                    {typeof report.submittedBy === 'object' && report.submittedBy
+                      ? report.submittedBy.email || report.submittedBy.completeName || report.submittedBy.username || 'Unknown User'
+                      : report.submittedBy || 'Unknown User'}
+                  </td>
                   <td className="py-3 px-4 text-gray-300">{report.location}</td>
                   <td className="py-3 px-4 text-gray-300">
                     {new Date(report.submittedAt).toLocaleDateString()}

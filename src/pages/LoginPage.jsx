@@ -54,6 +54,13 @@ const LoginPage = () => {
 						className='mx-auto flex justify-center mb-8'
 					>
 						<div className="text-center">
+							<div className="mb-4">
+								<img 
+									src="/mgb-logo.png" 
+									alt="MGB Logo" 
+									className="mx-auto h-20 w-auto opacity-90"
+								/>
+							</div>
 							<h1 className="text-4xl font-bold text-white mb-2">MINE RADAR</h1>
 							<p className="text-gray-400">Admin Panel</p>
 						</div>
@@ -160,6 +167,7 @@ const LoginPage = () => {
 							{isLoading ? "Signing in..." : "Sign in"}
 						</motion.button>
 					</div>
+
 
 					<div className="text-center text-sm text-gray-400">
 						<p>2025 © Mine Radar Admin Panel. All rights reserved.</p>

@@ -74,12 +74,12 @@ const UsersPage = () => {
 
   const getRoleBadge = (role) => {
     const roleConfig = {
-      normal_user: { bg: 'bg-gray-900', text: 'text-gray-300', label: 'Normal User' },
-      reporter_user: { bg: 'bg-blue-900', text: 'text-blue-300', label: 'Reporter' },
+      'Public User': { bg: 'bg-gray-900', text: 'text-gray-300', label: 'Public User' },
+      'Deputized Personnel': { bg: 'bg-blue-900', text: 'text-blue-300', label: 'Deputized Personnel' },
       admin: { bg: 'bg-purple-900', text: 'text-purple-300', label: 'Admin' }
     };
 
-    const config = roleConfig[role] || roleConfig.normal_user;
+    const config = roleConfig[role] || roleConfig['Public User'];
     return (
       <span className={`px-2 py-1 rounded-full text-xs ${config.bg} ${config.text}`}>
         {config.label}
@@ -101,7 +101,7 @@ const UsersPage = () => {
     );
   };
 
-  const roles = ['normal_user', 'reporter_user', 'admin'];
+  const roles = ['Public User', 'Deputized Personnel', 'admin'];
   const statuses = ['active', 'blocked'];
 
   return (
@@ -180,7 +180,7 @@ const UsersPage = () => {
             <option value="">All Roles</option>
             {roles.map(role => (
               <option key={role} value={role}>
-                {role.replace('_', ' ').toUpperCase()}
+                {role.toUpperCase()}
               </option>
             ))}
           </select>
@@ -270,7 +270,7 @@ const UsersPage = () => {
                           >
                             {roles.map(role => (
                               <option key={role} value={role}>
-                                {role.replace('_', ' ')}
+                                {role}
                               </option>
                             ))}
                           </select>
