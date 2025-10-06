@@ -1146,7 +1146,7 @@ const ReportsPage = () => {
               )}
 
               {/* Commodity & Site Status */}
-              {(selectedReport.commodity || selectedReport.siteStatus) && (
+              {(selectedReport.commodity || (selectedReport.siteStatus && ['illegal_mining', 'illegal_processing', 'illegal_smallscale'].includes(selectedReport.reportType))) && (
                 <div className="bg-gray-800 p-6 rounded-lg">
                   <h3 className="text-lg font-semibold text-white mb-4 flex items-center">
                     <div className="w-1 h-6 bg-yellow-500 mr-3 rounded"></div>
@@ -1159,7 +1159,7 @@ const ReportsPage = () => {
                         <p className="text-white">{selectedReport.commodity}</p>
                       </div>
                     )}
-                    {selectedReport.siteStatus && (
+                    {selectedReport.siteStatus && ['illegal_mining', 'illegal_processing', 'illegal_smallscale'].includes(selectedReport.reportType) && (
                       <div>
                         <label className="text-gray-400 text-sm">Site Status</label>
                         <p className="text-white capitalize">{selectedReport.siteStatus.replace('_', ' ')}</p>
